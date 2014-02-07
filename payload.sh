@@ -11,7 +11,7 @@ echo -e "Uptime:\t\t" `uptime`
 DISKS=`/sbin/fdisk -l | grep -P "^Disk /dev/sd" | cut -d " " -f 2 | cut -c -8`
 
 echo -e "-------------------------------------------------------------------------------------------------------------------------------------------------"
-echo -e "Disk Size Model SpinTime Reallocated Temp OfflineUncorrect ReportedUncorrect" > .temp
+echo -e "Disk Size Model SpinTime Reallocated Temp OfflineUncorrect ReportedUncorrect SeekError ReadError SpinRetry" > .temp
 
 /sbin/fdisk -l > $HOSTNAME-fdisk
 
@@ -27,8 +27,11 @@ do
     TEMP=$(echo -e "$SMART" | grep "Temperature_Celsius" | awk '{print $10}')
     OFFLINE_SECTOR=$(echo -e "$SMART" | grep "Offline_Uncorrectable" | awk '{print $10}')
     REPORTED_SECTOR=$(echo -e "$SMART" | grep "Reported_Uncorrect" | awk '{print $10}')
+    SEEK_ERROR=$(echo -e "$SMART" | grep "Seek_Error_Rate" | awk '{print $10}')
+    READ_ERROR=$(echo -e "$SMART" | grep "Raw_Read_Error_Rate" | awk '{print $10}')
+    SPIN_RETRY=$(echo -e "$SMART" | grep "Spin_Retry_Count" | awk '{print $10}')
 
-    echo -e "$NICE $SIZE $MODEL $SPIN_TIME $REALLOCATED $TEMP $OFFLINE_SECTOR $REPORTED_SECTOR" >> .temp
+    echo -e "$NICE $SIZE $MODEL $SPIN_TIME $REALLOCATED $TEMP $OFFLINE_SECTOR $REPORTED_SECTOR $SEEK_ERROR $READ_ERROR $SPIN_RETRY" >> .temp
 done
 column -t  .temp | tee $HOSTNAME-disk_report
 rm -rf .temp
